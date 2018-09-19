@@ -6,6 +6,51 @@
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
   <script type="text/babel">
+    const handleReponse = (xhr) => {
+        const type = xhr.getResponseHeader('content-type');
+        const content = document.querySelector("#content");
+        const h1 = document.createElement('h1');
+        const p = document.createElement('p');
+         
+        if(type === 'application/json'){ // json
+            console.dir(obj);
+            const obj = JSON.parse(xhr.response);
+            h1.textContent = `${obj.id}`;
+            p.textContent = `${obj.message}`;
+        }
+        else if(type === 'text/xml'){ // xml
+            const id = xhr.responseXML.querySelector('id').textContent;
+            const message = xhr.responseXML.querySelector('message').textContent;
+            console.dir(xhr.responseXML.querySelector('response'));
+            h1.textContent = `${id}`;
+            p.textContent = `${message}`;
+            
+        }
+        else {
+            console.dir("Unsupported type recieved, something broke.");
+        }
+         
+        content.textContent = ""; // replaces h1/p with appropriate content
+        content.appendChild(h1);
+        content.appendChild(p);
+      };
+    
+    const sendAjax = (url, acceptedType) => { // sends xhr request
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+        xhr.setRequestHeader("Accept", acceptedType);
+        xhr.onload = () => handleReponse(xhr);
+        xhr.send();
+      };
+
+    const init = () => { // init function, sets up elements
+        const button = document.querySelector("#send");
+        const acceptedType = document.querySelector("#type");
+        const page = document.querySelector("#page");
+        const sendRequest = () => sendAjax(page.value, acceptedType.value); // note to self: ask for clarification why we set up functions like this again
+        button.addEventListener('click', sendRequest);
+      }
+      window.onload = init;
 
   </script>
 </head>
